@@ -1,4 +1,4 @@
-package org.appspot.apprtc;
+package org.appspot.apprtc.socket;
 
 import android.os.Handler;
 import android.os.Looper;

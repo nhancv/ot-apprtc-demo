@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.util;
 
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import org.appspot.apprtc.R;
+import org.appspot.apprtc.ui.CallFragment;
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat;
 
 /**

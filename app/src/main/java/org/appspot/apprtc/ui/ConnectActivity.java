@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -34,6 +34,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.appspot.apprtc.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 

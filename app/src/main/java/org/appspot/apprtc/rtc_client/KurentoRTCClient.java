@@ -1,4 +1,4 @@
-package org.appspot.apprtc;
+package org.appspot.apprtc.rtc_client;
 
 import android.app.Application;
 import android.util.Log;
@@ -12,6 +12,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.IceCandidate;
+import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 
 import java.util.LinkedList;
@@ -20,7 +21,7 @@ import java.util.LinkedList;
  * Created by nhancao on 7/18/17.
  */
 
-public class KurentoRTCClient implements AppRTCClient, TCPChannelClient.TCPChannelEvents {
+public class KurentoRTCClient implements AppRTCClient {
     private static final String TAG = KurentoRTCClient.class.getSimpleName();
 
     private SignalingEvents events;
@@ -41,17 +42,12 @@ public class KurentoRTCClient implements AppRTCClient, TCPChannelClient.TCPChann
                 super.onOpen(serverHandshake);
 
                 SignalingParameters parameters = new SignalingParameters(
-                        // Ice servers are not needed for direct connections.
-                        new LinkedList<>(),
-                        true, // This code will only be run on the client side. So, we are not the initiator.
-                        null, // clientId
-                        null, // wssUrl
-                        null, // wssPostUrl
-                        null, // offerSdp
-                        null // iceCandidates
-                );
+                        new LinkedList<PeerConnection.IceServer>() {
+                            {
+                                add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
+                            }
+                        }, true, null, null, null, null, null);
                 events.onConnectedToRoom(parameters);
-//                streamPeer.createWebRTCPeer(application);
             }
 
             @Override
@@ -147,26 +143,6 @@ public class KurentoRTCClient implements AppRTCClient, TCPChannelClient.TCPChann
     @Override
     public void disconnectFromRoom() {
         Log.e(TAG, "disconnectFromRoom: ");
-    }
-
-    @Override
-    public void onTCPConnected(boolean server) {
-
-    }
-
-    @Override
-    public void onTCPMessage(String message) {
-
-    }
-
-    @Override
-    public void onTCPError(String description) {
-
-    }
-
-    @Override
-    public void onTCPClose() {
-
     }
 
 }

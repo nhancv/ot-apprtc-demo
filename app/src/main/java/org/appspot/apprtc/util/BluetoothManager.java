@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.util;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -20,21 +20,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 import android.util.Log;
 import java.util.List;
 import java.util.Set;
-import org.appspot.apprtc.util.AppRTCUtils;
+
 import org.webrtc.ThreadUtils;
 
 /**
  * AppRTCProximitySensor manages functions related to Bluetoth devices in the
  * AppRTC demo.
  */
-public class AppRTCBluetoothManager {
+public class BluetoothManager {
   private static final String TAG = "AppRTCBluetoothManager";
 
   // Timeout interval for starting or stopping audio to a Bluetooth SCO device.
@@ -63,8 +62,8 @@ public class AppRTCBluetoothManager {
   }
 
   private final Context apprtcContext;
-  private final AppRTCAudioManager apprtcAudioManager;
-  private final AudioManager audioManager;
+  private final AudioManager apprtcAudioManager;
+  private final android.media.AudioManager audioManager;
   private final Handler handler;
 
   int scoConnectionAttempts;
@@ -190,12 +189,12 @@ public class AppRTCBluetoothManager {
   };
 
   /** Construction. */
-  static AppRTCBluetoothManager create(Context context, AppRTCAudioManager audioManager) {
+  static BluetoothManager create(Context context, AudioManager audioManager) {
     Log.d(TAG, "create" + AppRTCUtils.getThreadInfo());
-    return new AppRTCBluetoothManager(context, audioManager);
+    return new BluetoothManager(context, audioManager);
   }
 
-  protected AppRTCBluetoothManager(Context context, AppRTCAudioManager audioManager) {
+  protected BluetoothManager(Context context, AudioManager audioManager) {
     Log.d(TAG, "ctor");
     ThreadUtils.checkIsOnMainThread();
     apprtcContext = context;
@@ -390,8 +389,8 @@ public class AppRTCBluetoothManager {
   /**
    * Stubs for test mocks.
    */
-  protected AudioManager getAudioManager(Context context) {
-    return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+  protected android.media.AudioManager getAudioManager(Context context) {
+    return (android.media.AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
   }
 
   protected void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {

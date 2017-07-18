@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.util;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -17,7 +17,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.util.Log;
-import org.appspot.apprtc.util.AppRTCUtils;
+
 import org.webrtc.ThreadUtils;
 
 /**
@@ -29,7 +29,7 @@ import org.webrtc.ThreadUtils;
  * A LUX-value more than the threshold means the proximity sensor returns "FAR".
  * Anything less than the threshold value and the sensor  returns "NEAR".
  */
-public class AppRTCProximitySensor implements SensorEventListener {
+public class ProximitySensor implements SensorEventListener {
   private static final String TAG = "AppRTCProximitySensor";
 
   // This class should be created, started and stopped on one thread
@@ -43,11 +43,11 @@ public class AppRTCProximitySensor implements SensorEventListener {
   private boolean lastStateReportIsNear = false;
 
   /** Construction */
-  static AppRTCProximitySensor create(Context context, Runnable sensorStateListener) {
-    return new AppRTCProximitySensor(context, sensorStateListener);
+  static ProximitySensor create(Context context, Runnable sensorStateListener) {
+    return new ProximitySensor(context, sensorStateListener);
   }
 
-  private AppRTCProximitySensor(Context context, Runnable sensorStateListener) {
+  private ProximitySensor(Context context, Runnable sensorStateListener) {
     Log.d(TAG, "AppRTCProximitySensor" + AppRTCUtils.getThreadInfo());
     onSensorStateListener = sensorStateListener;
     sensorManager = ((SensorManager) context.getSystemService(Context.SENSOR_SERVICE));

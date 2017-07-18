@@ -8,18 +8,19 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
-
-import org.appspot.apprtc.RoomParametersFetcher.RoomParametersFetcherEvents;
-import org.appspot.apprtc.WebSocketChannelClient.WebSocketChannelEvents;
-import org.appspot.apprtc.WebSocketChannelClient.WebSocketConnectionState;
-import org.appspot.apprtc.util.AsyncHttpURLConnection;
-import org.appspot.apprtc.util.AsyncHttpURLConnection.AsyncHttpEvents;
+package org.appspot.apprtc.rtc_client;
 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import org.appspot.apprtc.util.RoomParametersFetcher;
+import org.appspot.apprtc.util.RoomParametersFetcher.RoomParametersFetcherEvents;
+import org.appspot.apprtc.util.WebSocketChannelClient;
+import org.appspot.apprtc.util.WebSocketChannelClient.WebSocketChannelEvents;
+import org.appspot.apprtc.util.WebSocketChannelClient.WebSocketConnectionState;
+import org.appspot.apprtc.util.AsyncHttpURLConnection;
+import org.appspot.apprtc.util.AsyncHttpURLConnection.AsyncHttpEvents;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

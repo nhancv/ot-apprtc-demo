@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.ui;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -32,12 +32,19 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
-import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
-import org.appspot.apprtc.AppRTCAudioManager.AudioManagerEvents;
-import org.appspot.apprtc.AppRTCClient.RoomConnectionParameters;
-import org.appspot.apprtc.AppRTCClient.SignalingParameters;
-import org.appspot.apprtc.PeerConnectionClient.DataChannelParameters;
-import org.appspot.apprtc.PeerConnectionClient.PeerConnectionParameters;
+import org.appspot.apprtc.rtc_client.AppRTCClient;
+import org.appspot.apprtc.util.AudioManager;
+import org.appspot.apprtc.util.AudioManager.AudioDevice;
+import org.appspot.apprtc.util.AudioManager.AudioManagerEvents;
+import org.appspot.apprtc.rtc_client.AppRTCClient.RoomConnectionParameters;
+import org.appspot.apprtc.rtc_client.AppRTCClient.SignalingParameters;
+import org.appspot.apprtc.util.CpuMonitor;
+import org.appspot.apprtc.util.PeerConnectionClient;
+import org.appspot.apprtc.util.PeerConnectionClient.DataChannelParameters;
+import org.appspot.apprtc.util.PeerConnectionClient.PeerConnectionParameters;
+import org.appspot.apprtc.R;
+import org.appspot.apprtc.util.UnhandledExceptionHandler;
+import org.appspot.apprtc.rtc_client.KurentoRTCClient;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerator;
@@ -150,7 +157,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private PeerConnectionClient peerConnectionClient = null;
   private AppRTCClient appRtcClient;
   private SignalingParameters signalingParameters;
-  private AppRTCAudioManager audioManager = null;
+  private AudioManager audioManager = null;
   private EglBase rootEglBase;
   private SurfaceViewRenderer pipRenderer;
   private SurfaceViewRenderer fullscreenRenderer;
@@ -567,7 +574,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
 
     // Create and audio manager that will take care of audio routing,
     // audio modes, audio device enumeration etc.
-    audioManager = AppRTCAudioManager.create(getApplicationContext());
+    audioManager = AudioManager.create(getApplicationContext());
     // Store existing audio settings and change audio mode to
     // MODE_IN_COMMUNICATION for best possible VoIP performance.
     Log.d(TAG, "Starting the audio manager...");

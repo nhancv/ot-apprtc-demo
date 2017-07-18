@@ -8,10 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.rtc_client;
 
 import android.util.Log;
 
+import org.appspot.apprtc.util.TCPChannelClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
