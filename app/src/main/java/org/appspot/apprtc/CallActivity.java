@@ -31,11 +31,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
-import java.io.IOException;
-import java.lang.RuntimeException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+
 import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
 import org.appspot.apprtc.AppRTCAudioManager.AudioManagerEvents;
 import org.appspot.apprtc.AppRTCClient.RoomConnectionParameters;
@@ -58,6 +54,11 @@ import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoRenderer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Activity for peer connection call setup, call waiting
@@ -322,12 +323,13 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
 
     // Create connection client. Use DirectRTCClient if room name is an IP otherwise use the
     // standard WebSocketRTCClient.
-    if (loopback || !DirectRTCClient.IP_PATTERN.matcher(roomId).matches()) {
-      appRtcClient = new WebSocketRTCClient(this);
-    } else {
+//    if (loopback || !DirectRTCClient.IP_PATTERN.matcher(roomId).matches()) {
+//      appRtcClient = new WebSocketRTCClient(this);
+//    } else {
       Log.i(TAG, "Using DirectRTCClient because room name looks like an IP.");
-      appRtcClient = new DirectRTCClient(this);
-    }
+//      appRtcClient = new DirectRTCClient(this);
+      appRtcClient = new KurentoRTCClient(this, getApplication());
+//    }
     // Create connection parameters.
     String urlParameters = intent.getStringExtra(EXTRA_URLPARAMETERS);
     roomConnectionParameters =

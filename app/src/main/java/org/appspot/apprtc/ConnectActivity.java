@@ -33,10 +33,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.Random;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Handles the initial setup where the user selects which room to join.
@@ -503,7 +505,7 @@ public class ConnectActivity extends Activity {
 
     // Start AppRTCMobile activity.
     Log.d(TAG, "Connecting to room " + roomId + " at URL " + roomUrl);
-    if (validateUrl(roomUrl)) {
+//    if (validateUrl(roomUrl)) {
       Uri uri = Uri.parse(roomUrl);
       Intent intent = new Intent(this, CallActivity.class);
       intent.setData(uri);
@@ -574,7 +576,7 @@ public class ConnectActivity extends Activity {
       }
 
       startActivityForResult(intent, CONNECTION_REQUEST);
-    }
+//    }
   }
 
   private boolean validateUrl(String url) {
