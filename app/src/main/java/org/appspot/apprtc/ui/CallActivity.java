@@ -32,19 +32,20 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
+import org.appspot.apprtc.R;
 import org.appspot.apprtc.rtc_client.AppRTCClient;
+import org.appspot.apprtc.rtc_client.AppRTCClient.RoomConnectionParameters;
+import org.appspot.apprtc.rtc_client.AppRTCClient.SignalingParameters;
+import org.appspot.apprtc.rtc_client.DirectRTCClient;
+import org.appspot.apprtc.rtc_client.WebSocketRTCClient;
 import org.appspot.apprtc.util.AudioManager;
 import org.appspot.apprtc.util.AudioManager.AudioDevice;
 import org.appspot.apprtc.util.AudioManager.AudioManagerEvents;
-import org.appspot.apprtc.rtc_client.AppRTCClient.RoomConnectionParameters;
-import org.appspot.apprtc.rtc_client.AppRTCClient.SignalingParameters;
 import org.appspot.apprtc.util.CpuMonitor;
 import org.appspot.apprtc.util.PeerConnectionClient;
 import org.appspot.apprtc.util.PeerConnectionClient.DataChannelParameters;
 import org.appspot.apprtc.util.PeerConnectionClient.PeerConnectionParameters;
-import org.appspot.apprtc.R;
 import org.appspot.apprtc.util.UnhandledExceptionHandler;
-import org.appspot.apprtc.rtc_client.KurentoRTCClient;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerator;
@@ -74,8 +75,6 @@ import java.util.Set;
 public class CallActivity extends Activity implements AppRTCClient.SignalingEvents,
                                                       PeerConnectionClient.PeerConnectionEvents,
                                                       CallFragment.OnCallEvents {
-  private static final String TAG = CallActivity.class.getSimpleName();
-
   public static final String EXTRA_ROOMID = "org.appspot.apprtc.ROOMID";
   public static final String EXTRA_URLPARAMETERS = "org.appspot.apprtc.URLPARAMETERS";
   public static final String EXTRA_LOOPBACK = "org.appspot.apprtc.LOOPBACK";
@@ -124,7 +123,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   public static final String EXTRA_PROTOCOL = "org.appspot.apprtc.PROTOCOL";
   public static final String EXTRA_NEGOTIATED = "org.appspot.apprtc.NEGOTIATED";
   public static final String EXTRA_ID = "org.appspot.apprtc.ID";
-
+  private static final String TAG = CallActivity.class.getSimpleName();
   private static final int CAPTURE_PERMISSION_REQUEST_CODE = 1;
 
   // List of mandatory application permissions.
@@ -133,27 +132,12 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
 
   // Peer connection statistics callback period in ms.
   private static final int STAT_CALLBACK_PERIOD = 1000;
-
-  private class ProxyRenderer implements VideoRenderer.Callbacks {
-    private VideoRenderer.Callbacks target;
-
-    synchronized public void renderFrame(VideoRenderer.I420Frame frame) {
-      if (target == null) {
-        Logging.d(TAG, "Dropping frame in proxy because target is null.");
-        VideoRenderer.renderFrameDone(frame);
-        return;
-      }
-
-      target.renderFrame(frame);
-    }
-
-    synchronized public void setTarget(VideoRenderer.Callbacks target) {
-      this.target = target;
-    }
-  }
-
+  private static Intent mediaProjectionPermissionResultData;
+  private static int mediaProjectionPermissionResultCode;
   private final ProxyRenderer remoteProxyRenderer = new ProxyRenderer();
   private final ProxyRenderer localProxyRenderer = new ProxyRenderer();
+  private final List<VideoRenderer.Callbacks> remoteRenderers =
+          new ArrayList<VideoRenderer.Callbacks>();
   private PeerConnectionClient peerConnectionClient = null;
   private AppRTCClient appRtcClient;
   private SignalingParameters signalingParameters;
@@ -162,8 +146,6 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private SurfaceViewRenderer pipRenderer;
   private SurfaceViewRenderer fullscreenRenderer;
   private VideoFileRenderer videoFileRenderer;
-  private final List<VideoRenderer.Callbacks> remoteRenderers =
-      new ArrayList<VideoRenderer.Callbacks>();
   private Toast logToast;
   private boolean commandLineRun;
   private int runTimeMs;
@@ -176,15 +158,21 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private long callStartedTimeMs = 0;
   private boolean micEnabled = true;
   private boolean screencaptureEnabled = false;
-  private static Intent mediaProjectionPermissionResultData;
-  private static int mediaProjectionPermissionResultCode;
   // True if local view is in the fullscreen renderer.
   private boolean isSwappedFeeds;
-
   // Controls
   private CallFragment callFragment;
   private HudFragment hudFragment;
   private CpuMonitor cpuMonitor;
+
+  @TargetApi(19)
+  private static int getSystemUiVisibility() {
+    int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+    }
+    return flags;
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -330,13 +318,13 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
 
     // Create connection client. Use DirectRTCClient if room name is an IP otherwise use the
     // standard WebSocketRTCClient.
-//    if (loopback || !DirectRTCClient.IP_PATTERN.matcher(roomId).matches()) {
-//      appRtcClient = new WebSocketRTCClient(this);
-//    } else {
+    if (loopback || !DirectRTCClient.IP_PATTERN.matcher(roomId).matches()) {
+      appRtcClient = new WebSocketRTCClient(this);
+    } else {
       Log.i(TAG, "Using DirectRTCClient because room name looks like an IP.");
-//      appRtcClient = new DirectRTCClient(this);
-      appRtcClient = new KurentoRTCClient(this, getApplication());
-//    }
+      appRtcClient = new DirectRTCClient(this);
+//      appRtcClient = new KurentoRTCClient(this, getApplication());
+    }
     // Create connection parameters.
     String urlParameters = intent.getStringExtra(EXTRA_URLPARAMETERS);
     roomConnectionParameters =
@@ -388,15 +376,6 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
         (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
     windowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
     return displayMetrics;
-  }
-
-  @TargetApi(19)
-  private static int getSystemUiVisibility() {
-    int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-    }
-    return flags;
   }
 
   @TargetApi(21)
@@ -938,5 +917,23 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   @Override
   public void onPeerConnectionError(final String description) {
     reportError(description);
+  }
+
+  private class ProxyRenderer implements VideoRenderer.Callbacks {
+    private VideoRenderer.Callbacks target;
+
+    synchronized public void renderFrame(VideoRenderer.I420Frame frame) {
+      if (target == null) {
+        Logging.d(TAG, "Dropping frame in proxy because target is null.");
+        VideoRenderer.renderFrameDone(frame);
+        return;
+      }
+
+      target.renderFrame(frame);
+    }
+
+    synchronized public void setTarget(VideoRenderer.Callbacks target) {
+      this.target = target;
+    }
   }
 }
